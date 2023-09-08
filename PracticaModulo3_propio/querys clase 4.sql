@@ -105,3 +105,110 @@ INTO TABLE calendario
 FIELDS TERMINATED BY ',' ENCLOSED BY '' ESCAPED BY '' 
 LINES TERMINATED BY '\n' IGNORE 1 LINES;*/
 
+DROP TABLE IF EXISTS sucursal;
+CREATE TABLE IF NOT EXISTS sucursal (
+	ID			INTEGER,
+	Sucursal	VARCHAR(40),
+	Domicilio	VARCHAR(150),
+	Localidad	VARCHAR(80),
+	Provincia	VARCHAR(50),
+	Latitud	VARCHAR(30),
+	Longitud	VARCHAR(30)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+
+LOAD DATA INFILE 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\Sucursales_ANSI.csv' 
+INTO TABLE sucursal
+CHARACTER SET latin1 
+FIELDS TERMINATED BY ';' ENCLOSED BY '\"' ESCAPED BY '\"' 
+LINES TERMINATED BY '\n' IGNORE 1 LINES;
+SELECT * FROM sucursal;
+TRUNCATE TABLE sucursal;
+
+ALTER TABLE empleado 
+RENAME COLUMN idEmpleado TO IdEmpleado;
+
+ALTER TABLE cliente 
+RENAME COLUMN X TO Longitud,
+RENAME COLUMN Y TO Latitud;
+
+ALTER TABLE cliente 
+DROP COLUMN FechaUltimaModificacion,
+DROP COLUMN UsuarioUltimaModificacion,
+DROP COLUMN MarcaBaja,
+DROP COLUMN UsuarioAlta;
+
+
+DELETE FROM cliente 
+WHERE IdCliente = Null and NombreApellido = Null;
+
+ALTER TABLE compra 
+RENAME COLUMN IDProducto TO IdProducto;
+
+ALTER TABLE gasto 
+RENAME COLUMN IDTipoGasto TO IdTipoGasto;
+
+ALTER TABLE proveedor
+RENAME COLUMN Adress TO Domicilio,
+RENAME COLUMN City TO Localidad,
+RENAME COLUMN State TO Provincia,
+DROP COLUMN  Country,
+RENAME COLUMN Department TO Departamento;
+
+ALTER TABLE venta
+RENAME COLUMN idVenta to IdVenta,
+RENAME COLUMN Fecha_Entrega to FechaEntrega;
+
+UPDATE cliente
+SET Domicilio = UC_Words(TRIM(Domicilio)),
+	Localidad = UC_Words(TRIM(Localidad)),
+	NombreApellido = UC_Words(TRIM(NombreApellido));
+    
+UPDATE Proveedor
+SET Domicilio = UC_Words(TRIM(Domicilio)),
+	Localidad = UC_Words(TRIM(Localidad)),
+	Provincia = UC_Words(TRIM(Provincia)),
+    Departamento = UC_Words(TRIM(Departamento));
+    
+UPDATE Producto
+SET Concepto = UC_Words(TRIM(Concepto)),
+	Tipo = UC_Words(TRIM(Tipo));
+
+ALTER TABLE empleado
+DROP COLUMN NombreApellido;
+
+#ALTER TABLE empleado ADD COLUMN NombreApellido VARCHAR(50) GENERATED ALWAYS AS (concat(nombre," ",apellido)) STORED,
+#DROP COLUMN Apellido,
+#DROP COLUMN Nombre;
+
+CREATE TABLE IF NOT EXISTS cargo (
+	IdCargo	INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	Cargo	VARCHAR(40) NOT NULL
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+
+INSERT INTO cargo (Cargo) 
+SELECT DISTINCT Cargo 
+FROM empleado 
+ORDER BY Cargo;
+
+CREATE TABLE IF NOT EXISTS sector (
+	IdSector	INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	Sector	VARCHAR(40) NOT NULL
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+
+INSERT INTO sector (sector) 
+SELECT DISTINCT Sector
+FROM empleado 
+ORDER BY Sector;
+
+CREATE TABLE IF NOT EXISTS tipoDeProducto (
+	IdTipoDeProducto	INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	TipoDeProducto	VARCHAR(40) NOT NULL
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+
+INSERT INTO tipoDeProducto (tipodeproducto) 
+SELECT DISTINCT Tipo
+FROM producto
+ORDER BY Tipo;
